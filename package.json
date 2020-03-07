@@ -1,0 +1,25 @@
+{
+  "name": "nodejs_web_crawler",
+  "version": "1.0.0",
+  "description": "Web Crawler for Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chuangwgfd/nodejs_web_crawler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chuangwgfd/nodejs_web_crawler/issues"
+  },
+  "homepage": "https://github.com/chuangwgfd/nodejs_web_crawler#readme",
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "jsdom": "^16.2.0",
+    "nightmare": "^3.0.2"
+  }
+}
