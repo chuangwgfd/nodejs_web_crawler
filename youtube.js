@@ -58,7 +58,7 @@ async function step3() {
         offset += 500;
         await nightmare.scrollTo(offset, 0).wait(500);
 
-        if (offset > 2000) {
+        if (offset > 600) {
             break; // 滾動一段高度後,強迫跳出迴圈 //視情況使用
         }
     }
@@ -109,6 +109,49 @@ async function step4() {
 }
 
 async function step5() {
+    for (let i = 0; i < arrLink.length; i++) {
+        // 前往影片播放頁面，取得
+        let html = await nightmare
+        .goto(arrLink[i].link)
+        .wait('div#count.style-scope.ytd-video-primary-info-renderer span.view-count.style-scope.yt-view-count-renderer')
+        .evaluate(()=>{
+            return document.documentElement.innerHTML
+        })
+
+        //取得觀看次數字串(未整理)
+        let strPageView = $(html).find('div#count.style-scope.ytd-video-primary-info-renderer span.view-count.style-scope.yt-view-count-renderer').text()
+
+        //取得觀看次數
+        let pattern = /[0-9,]+/g
+        let match = null
+        match = pattern.exec(strPageView)
+        strPageView = match[0]
+        strPageView = strPageView.replace(/,/g, '')
+
+        //取得按讚數
+        let strLikeCount = $(html)
+        .find('div#top-level-buttons yt-formatted-string#text:eq(0)').attr('aria-label')
+        pattern = /[0-9,]+/g
+        match = pattern.exec(strLikeCount)
+        strLikeCount = match[0]
+        strLikeCount = strLikeCount.replace(/,/g, '')
+
+        //取得倒讚數
+        let strDisLikeCount = $(html)
+        .find('div#top-level-buttons yt-formatted-string#text:eq(1)').attr('aria-label')
+        pattern = /[0-9,]+/g
+        match = pattern.exec(strDisLikeCount)
+        strDisLikeCount = match[0]
+        strDisLikeCount = strDisLikeCount.replace(/,/g, '')
+
+        //建立新屬性
+        arrLink[i].pageView = parseInt(strPageView)
+        arrLink[i].linkCount = parseInt(strLikeCount)
+        arrLink[i].disLinkCount = parseInt(strDisLikeCount)
+    }
+}
+
+async function close() {
     await nightmare.end((err)=>{
         if (err) throw err;
         console.log('關閉 nightmare')
@@ -123,7 +166,7 @@ async function asyncArray(functionList) {
 }
 
 try{
-    asyncArray([step1, step2, step3, step4, step5]).then(async ()=>{
+    asyncArray([step1, step2, step3, step4, step5, close]).then(async ()=>{
         console.dir(arrLink, {depth: null});
 
         if ( !fs.existsSync('downloads/youtube.json')) {
