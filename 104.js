@@ -63,9 +63,11 @@ async function scrollPage() {
         });
 
         // 每次滾動 500 單位距離 offset 是定位 不是距離量, await(500)每0.5秒 執行下一次 太快有些網站會檔
-        offset += 500;
+        offset += 300;
         await nightmare.scrollTo(offset, 0).wait(500);
         console.log(`offset: ${offset}, currentHeight: ${currentHeight}`)
+
+        if (offset > 500) break
 
         if ( currentHeight - offset < 2000 && await nightmare.exists('button.b-btn.b-btn--link.js-more-page')) {
             await _checkPagination()
@@ -102,7 +104,7 @@ async function parseHtml() {
         let companyName = elm.find('ul.b-list-inline.b-clearfix li a').text().trim();
         let companyLink = 'https:' +elm.find('ul.b-list-inline.b-clearfix li a').attr('href');
         let category = elm.find('ul.b-list-inline.b-clearfix li:eq(2)').text();
-        console.log(`$(location),$(companyName)`)
+        // console.log(`$(location),$(companyName)`)
         
         obj.i = index;
         obj.keyword = strKeyword;
@@ -122,6 +124,31 @@ async function parseHtml() {
 
 }
 
+async function getDetail() {
+    for (let i = 0; i < arrLink.length; i++) {
+        // 前往影片播放頁面，取得
+        let html = await nightmare
+        .goto(arrLink[i].positionLink)
+        .wait('div.job-description-table.row div.row.mb-2')
+        .evaluate(()=>{
+            return document.documentElement.innerHTML
+        })
+
+        // 取得上班地點
+        let positionPlace = $(html)
+        .find('div.job-description-table.row div.row.mb-2:eq(3) p.t3.mb-0')
+        .text().trim()
+
+        console.log(positionPlace)
+        arrLink[i].positionPlace = positionPlace
+    }
+}
+
+
+
+
+
+
 // 關閉 nightmare
 async function close() {
     await nightmare.end(()=>{
@@ -137,7 +164,7 @@ async function asyncArray(functionList) {
 }
 
 try{
-    asyncArray([search, setJobType, scrollPage, parseHtml, close]).then(async ()=>{
+    asyncArray([search, setJobType, scrollPage, parseHtml, getDetail,close]).then(async ()=>{
         console.dir(arrLink, {depth: null});
 
         
